@@ -21,31 +21,30 @@ import java.util.Map;
 public class MyGraph {
 
     public static void main(String[] args) {
-        int VERTEX_SIZE = 7;
         int[][] graph = {
-                {1, 1, 1, 0, 0, 0, 1},
-                {1, 1, 1, 1, 0, 0, 0},
-                {1, 1, 1, 1, 0, 1, 1},
-                {0, 1, 1, 1, 1, 0, 1},
-                {0, 0, 0, 1, 1, 1, 0},
-                {0, 0, 1, 0, 1, 1, 0},
-                {0, 0, 1, 0, 1, 1, 0},
-                {0, 0, 1, 0, 1, 1, 0},
-                {0, 0, 1, 0, 1, 1, 0},
-                {1, 0, 1, 1, 0, 0, 1}};
+                {1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+                {1, 1, 0, 0, 1, 0, 0, 0, 0, 0},
+                {1, 0, 1, 0, 1, 0, 0, 0, 0, 0},
+                {1, 0, 0, 1, 1, 1, 0, 0, 0, 0},
+                {0, 1, 1, 1, 1, 1, 1, 0, 1, 0},
+                {0, 0, 0, 1, 1, 1, 1, 1, 0, 0},
+                {0, 0, 0, 0, 1, 1, 1, 0, 0, 1},
+                {0, 0, 0, 0, 0, 1, 0, 1, 1, 1},
+                {0, 0, 0, 0, 1, 0, 0, 1, 1, 1},
+                {0, 0, 0, 0, 0, 0, 1, 1, 1, 1}};
         int[][] initialGraph = graph.clone();
         Map<Integer, Color> vertexColor = new HashMap<>();
         Map<Color, ArrayList<Integer>> coloredVertex = new HashMap<>();
-        for (int i = 0; i < VERTEX_SIZE; i++) {
+        for (int i = 0; i < graph.length; i++) {
             if (vertexColor.get(i) != null) {
                 break;
             }
             Color color = getRandomColor();
             vertexColor.put(i, color);
-            for (int j = 0; j < VERTEX_SIZE; j++) {
-                if (graph[i][j] == 0 && graph[j][i] == 0 && vertexColor.get(j) == null) {
+            for (int j = 0; j < graph.length; j++) {
+                if (graph[i][j] == 0 && j != i + 1 && vertexColor.get(j) == null) {
                     vertexColor.put(j, color);
-                    for (int k = 0; k < VERTEX_SIZE; k++) {
+                    for (int k = 0; k < graph.length; k++) {
                         if (graph[j][k] == 1) {
                             graph[i][k] = graph[j][k];
                         }
