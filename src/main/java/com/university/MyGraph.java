@@ -1,48 +1,26 @@
 package com.university;
 
+import com.google.common.base.Objects;
+import edu.uci.ics.jung.algorithms.layout.CircleLayout;
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.SparseMultigraph;
+import edu.uci.ics.jung.visualization.BasicVisualizationServer;
+import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
+import edu.uci.ics.jung.visualization.renderers.Renderer;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-import com.mxgraph.layout.mxCircleLayout;
-import com.mxgraph.layout.mxIGraphLayout;
-import com.mxgraph.util.mxCellRenderer;
-import lombok.SneakyThrows;
-import org.jgrapht.ext.JGraphXAdapter;
-import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
-
-import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MyGraph {
-    @SneakyThrows
+
     public static void main(String[] args) {
-        DefaultDirectedGraph<String, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-
-        String x1 = "x1";
-        String x2 = "x2";
-        String x3 = "x3";
-
-        g.addVertex(x1);
-        g.addVertex(x2);
-        g.addVertex(x3);
-
-        DefaultEdge edge = g.addEdge(x1, x2);
-        g.addEdge(x2, x3);
-        g.addEdge(x3, x1);
-
-        JGraphXAdapter<String, DefaultEdge> graphAdapter = new JGraphXAdapter<>(g);
-        mxIGraphLayout layout = new mxCircleLayout(graphAdapter);
-        layout.execute(graphAdapter.getDefaultParent());
-
-
-        BufferedImage image = mxCellRenderer.createBufferedImage(graphAdapter, null, 2, Color.WHITE, true, null);
-        File imgFile = new File("src/main/resources/graph.png");
-        ImageIO.write(image, "PNG", imgFile);
-
         int VERTEX_SIZE = 7;
         int[][] graph = {
                 {1, 1, 1, 0, 0, 0, 1},
@@ -51,7 +29,11 @@ public class MyGraph {
                 {0, 1, 1, 1, 1, 0, 1},
                 {0, 0, 0, 1, 1, 1, 0},
                 {0, 0, 1, 0, 1, 1, 0},
+                {0, 0, 1, 0, 1, 1, 0},
+                {0, 0, 1, 0, 1, 1, 0},
+                {0, 0, 1, 0, 1, 1, 0},
                 {1, 0, 1, 1, 0, 0, 1}};
+        int[][] initialGraph = graph.clone();
         Map<Integer, Color> vertexColor = new HashMap<>();
         Map<Color, ArrayList<Integer>> coloredVertex = new HashMap<>();
         for (int i = 0; i < VERTEX_SIZE; i++) {
@@ -75,9 +57,67 @@ public class MyGraph {
             coloredVertex.putIfAbsent(color, new ArrayList<>());
             coloredVertex.get(color).add(vertex);
         });
+        paintColoredGraph(vertexColor, initialGraph);
+    }
+
+    private static void paintColoredGraph(Map<Integer, Color> vertexColor, int[][] graph) {
+        Graph<Integer, String> g = new SparseMultigraph<>();
+
+        vertexColor.forEach((vertex, color) -> {
+            g.addVertex(vertex);
+        });
+
+        List<Edge> edges = new ArrayList<>();
+        matrixToEdges(graph, edges);
+        edges.forEach(edge -> g.addEdge(edge.toString(), edge.getStartVertex(), edge.getEndVertex()));
+        CircleLayout<Integer, String> layout = new CircleLayout<>(g);
+        layout.setSize(new Dimension(300, 300));
+        BasicVisualizationServer<Integer, String> vv = new BasicVisualizationServer<>(layout);
+        vv.setPreferredSize(new Dimension(400, 300));
+        vv.getRenderContext().setVertexFillPaintTransformer(vertexColor::get);
+        vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
+        vv.getRenderer().getVertexLabelRenderer().setPosition(Renderer.VertexLabel.Position.CNTR);
+
+        JFrame frame = new JFrame("Simple Graph View");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(vv);
+        frame.pack();
+        frame.setVisible(true);
+    }
+
+    private static void matrixToEdges(int[][] graph, List<Edge> edges) {
+        for (int i = 0; i < graph.length; i++) {
+            for (int j = 0; j < graph.length; j++) {
+                if (i != j && graph[i][j] != 0 && graph[j][i] != 0 && !edges.contains(new Edge(i, j))) {
+                    edges.add(new Edge(i, j));
+                }
+            }
+        }
     }
 
     private static Color getRandomColor() {
         return new Color((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    static class Edge {
+        private int startVertex;
+        private int endVertex;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Edge edge = (Edge) o;
+            return startVertex == edge.startVertex && endVertex == edge.endVertex ||
+                    startVertex == edge.endVertex && endVertex == edge.startVertex;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(startVertex, endVertex);
+        }
     }
 }
