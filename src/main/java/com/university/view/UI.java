@@ -37,7 +37,7 @@ public class UI extends JFrame {
     private JButton ex1Btn;
     private JButton ex2Btn;
     private GraphController controller;
-    List<List<JTextField>> vertices;
+    private List<List<JTextField>> vertices;
 
     public UI(GraphController graphController) {
         controller = graphController;
