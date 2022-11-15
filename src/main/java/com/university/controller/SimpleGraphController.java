@@ -50,12 +50,12 @@ public class SimpleGraphController implements GraphController {
 
         for (int i = 0; i < matrix.length; i++) {
             if (vertexColor.get(i) != null) {
-                break;
+                continue;
             }
             Color color = getRandomColor();
             vertexColor.put(i, color);
             for (int j = 0; j < matrix.length; j++) {
-                if (matrix[i][j] == 0 && j != i + 1 && vertexColor.get(j) == null) {
+                if (matrix[i][j] == 0 && vertexColor.get(j) == null) {
                     vertexColor.put(j, color);
                     for (int k = 0; k < matrix.length; k++) {
                         if (matrix[j][k] == 1) {
